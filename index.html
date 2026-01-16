@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0f19" />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Планы" />
+
+  <title>Планы</title>
+
+  <style>
+    :root{
+      --bg:#0b0f19;
+      --card:#121a2b;
+      --card2:#0f1626;
+      --text:#e8eefc;
+      --muted:#a8b3cf;
+      --line:rgba(232,238,252,.10);
+      --accent:#7c3aed;
+      --good:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius2: 14px;
+      --tap: 44px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 700px at 15% 0%, rgba(124,58,237,.25), transparent 60%),
+                  radial-gradient(900px 600px at 90% 20%, rgba(34,197,94,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .app{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(11,15,25,.75);
+      border-bottom:1px solid var(--line);
+      padding: 12px 14px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      max-width: 980px;
+      margin:0 auto;
+    }
+
+    .logo{
+      width:38px;height:38px;
+      border-radius:12px;
+      background: linear-gradient(145deg, rgba(124,58,237,.95), rgba(56,189,248,.65));
+      box-shadow: 0 10px 22px rgba(124,58,237,.25);
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+    .logo span{font-weight:800; letter-spacing:.5px}
+
+    .titlewrap{min-width:0; flex:1}
+    .title{
+      font-size:15px;
+      font-weight:700;
+      line-height:1.1;
+      margin:0;
+    }
+    .subtitle{
+      margin:3px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .pill{
+      font-size:12px;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background: rgba(18,26,43,.55);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      gap:6px;
+      height: 36px;
+    }
+
+    main{
+      width:100%;
+      max-width:980px;
+      margin:0 auto;
+      padding: 14px;
+      padding-bottom: 100px;
+    }
+
+    .grid{
+      display:grid;
+      gap:12px;
+    }
+
+    @media (min-width: 820px){
+      .grid{grid-template-columns: 1.15fr .85fr}
+    }
+
+    .card{
+      background: rgba(18,26,43,.82);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card h2{
+      margin:0;
+      font-size:14px;
+      font-weight:750;
+      letter-spacing:.2px;
+    }
+
+    .cardhead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(15,22,38,.75);
+    }
+
+    .cardbody{padding: 12px}
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .tab{
+      border:1px solid var(--line);
+      background: rgba(18,26,43,.45);
+      color:var(--text);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size:12px;
+      min-height: 36px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab[aria-selected="true"]{
+      border-color: rgba(124,58,237,.65);
+      background: rgba(124,58,237,.22);
+    }
+
+    .btn{
+      min-height: var(--tap);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(18,26,43,.65);
+      color:var(--text);
+      font-size:13px;
+      font-weight:650;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .btn.primary{
+      background: rgba(124,58,237,.30);
+      border-color: rgba(124,58,237,.65);
+    }
+    .btn.danger{
+      background: rgba(239,68,68,.18);
+      border-color: rgba(239,68,68,.55);
+    }
+
+    .row{display:flex; gap:10px; align-items:center}
+
+    .input, .textarea, select{
+      width:100%;
+      background: rgba(11,15,25,.55);
+      border:1px solid var(--line);
+      color:var(--text);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 14px;
+      outline:none;
+    }
+    .textarea{min-height: 120px; resize: vertical}
+
+    .muted{color:var(--muted); font-size:12px}
+
+    .list{display:flex; flex-direction:column; gap:8px}
+
+    .item{
+      border:1px solid var(--line);
+      background: rgba(11,15,25,.35);
+      border-radius: 16px;
+      padding: 10px 10px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+
+    .chk{
+      width:22px;height:22px;
+      border-radius:8px;
+      border:1px solid rgba(232,238,252,.25);
+      display:grid;
+      place-items:center;
+      margin-top:2px;
+      flex:0 0 auto;
+      cursor:pointer;
+      user-select:none;
+      background: rgba(18,26,43,.35);
+    }
+    .chk[data-on="true"]{
+      border-color: rgba(34,197,94,.7);
+      background: rgba(34,197,94,.22);
+    }
+
+    .item main{flex:1; min-width:0}
+    .it-title{
+      font-weight:700;
+      font-size:14px;
+      margin:0;
+      word-break: break-word;
+    }
+    .it-meta{
+      margin:4px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .badge{
+      font-family: var(--mono);
+      font-size:11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(18,26,43,.55);
+    }
+
+    .iconbtn{
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(18,26,43,.55);
+      color: var(--text);
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+
+    .split{display:grid; grid-template-columns: 1fr; gap:10px}
+    @media (min-width: 520px){
+      .split{grid-template-columns: 1fr 1fr}
+    }
+
+    .bottomnav{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      border-top:1px solid var(--line);
+      background: rgba(11,15,25,.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      z-index:20;
+    }
+
+    .navwrap{
+      max-width: 980px;
+      margin: 0 auto;
+      display:flex;
+      gap:8px;
+    }
+
+    .navbtn{
+      flex:1;
+      min-height: 46px;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(18,26,43,.45);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .navbtn[aria-selected="true"]{
+      background: rgba(124,58,237,.24);
+      border-color: rgba(124,58,237,.60);
+    }
+
+    dialog{
+      border:none;
+      border-radius: 18px;
+      width: min(560px, calc(100vw - 24px));
+      background: rgba(18,26,43,.95);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+    dialog::backdrop{background: rgba(0,0,0,.55)}
+    .dhead{display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 12px; border-bottom:1px solid var(--line)}
+    .dbody{padding: 12px}
+    .dfoot{padding: 12px; border-top:1px solid var(--line); display:flex; gap:10px; justify-content:flex-end}
+
+    .toast{
+      position:fixed;
+      left:50%;
+      transform: translateX(-50%);
+      bottom: 90px;
+      background: rgba(15,22,38,.92);
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      display:none;
+      z-index: 50;
+      max-width: calc(100vw - 28px);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .hint{font-size:12px; color: var(--muted); line-height:1.45}
+    .mono{font-family: var(--mono)}
+    .sep{height:1px;background:var(--line);margin:10px 0}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="topbar">
+        <div class="logo" aria-hidden="true"><span>P</span></div>
+        <div class="titlewrap">
+          <p class="title">Планы</p>
+          <p class="subtitle" id="subtitle">Офлайн. Данные хранятся на устройстве.</p>
+        </div>
+        <div class="pill" id="pill">
+          <span class="mono" id="todayPill">—</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="grid">
+        <div class="card" id="leftCard">
+          <div class="cardhead">
+            <h2 id="sectionTitle">Горизонты</h2>
+            <div class="row">
+              <button class="btn" id="btnExport" title="Экспорт">Экспорт</button>
+              <button class="btn" id="btnImport" title="Импорт">Импорт</button>
+            </div>
+          </div>
+          <div class="cardbody" id="leftBody"></div>
+        </div>
+
+        <div class="card" id="rightCard">
+          <div class="cardhead">
+            <h2 id="sideTitle">Быстро</h2>
+            <button class="btn primary" id="btnQuickAdd">+ Добавить</button>
+          </div>
+          <div class="cardbody" id="rightBody"></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="bottomnav">
+      <div class="navwrap">
+        <button class="navbtn" data-view="horizons" aria-selected="true">Горизонты</button>
+        <button class="navbtn" data-view="week" aria-selected="false">Неделя</button>
+        <button class="navbtn" data-view="today" aria-selected="false">Сегодня</button>
+        <button class="navbtn" data-view="notes" aria-selected="false">Заметки</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <dialog id="dlg">
+      <form method="dialog" id="dlgForm">
+        <div class="dhead">
+          <div>
+            <div style="font-weight:800" id="dlgTitle">Добавить</div>
+            <div class="muted" id="dlgSub">—</div>
+          </div>
+          <button class="iconbtn" value="cancel" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="dbody" id="dlgBody"></div>
+        <div class="dfoot" id="dlgFoot"></div>
+      </form>
+    </dialog>
+
+    <input type="file" id="fileImport" accept="application/json" hidden />
+  </div>
+
+  <script>
+    // ---- PWA install (service worker) ----
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    // ---- Helpers ----
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+    const uid = () => Math.random().toString(16).slice(2) + Date.now().toString(16);
+    const fmtDate = (d) => new Intl.DateTimeFormat('ru-RU', { day:'2-digit', month:'short' }).format(d);
+
+    function toast(msg){
+      const t = $('#toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      clearTimeout(toast._tm);
+      toast._tm = setTimeout(() => t.style.display='none', 2200);
+    }
+
+    // ---- Data model ----
+    const DEFAULT = {
+      version: 1,
+      horizons: {
+        "1": [], "3": [], "5": [], "10": [], "15": [], "20": []
+      },
+      week: [],
+      today: [],
+      notes: ""
+    };
+
+    const STORAGE_KEY = 'plan_pwa_v1';
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return structuredClone(DEFAULT);
+        const data = JSON.parse(raw);
+        // Simple migration guard
+        if(!data || typeof data !== 'object') return structuredClone(DEFAULT);
+        return Object.assign(structuredClone(DEFAULT), data);
+      }catch(e){
+        return structuredClone(DEFAULT);
+      }
+    }
+
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      updateSubtitle();
+    }
+
+    function updateSubtitle(){
+      const totalGoals = Object.values(state.horizons).reduce((a,arr)=>a+arr.length,0);
+      const totalWeek = state.week.length;
+      const totalToday = state.today.length;
+      $('#subtitle').textContent = `Офлайн. Цели: ${totalGoals} · Неделя: ${totalWeek} · Сегодня: ${totalToday}`;
+    }
+
+    let state = load();
+
+    // ---- Views ----
+    const VIEWS = ['horizons','week','today','notes'];
+    let view = 'horizons';
+    let horizon = '1';
+
+    const DAYS = [
+      {k:'mon', n:'Пн'},
+      {k:'tue', n:'Вт'},
+      {k:'wed', n:'Ср'},
+      {k:'thu', n:'Чт'},
+      {k:'fri', n:'Пт'},
+      {k:'sat', n:'Сб'},
+      {k:'sun', n:'Вс'},
+    ];
+
+    // ---- Rendering ----
+    function setView(v){
+      view = v;
+      $$('.navbtn').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+      render();
+    }
+
+    function render(){
+      $('#sectionTitle').textContent = ({
+        horizons: 'Горизонты',
+        week: 'Задачи на неделю',
+        today: 'Чеклист дня',
+        notes: 'Заметки'
+      })[view];
+
+      // Right side = context helper
+      $('#sideTitle').textContent = ({
+        horizons: 'Цели',
+        week: 'Фокус недели',
+        today: 'Фокус дня',
+        notes: 'Инструменты'
+      })[view];
+
+      $('#leftBody').innerHTML = '';
+      $('#rightBody').innerHTML = '';
+
+      if(view === 'horizons') renderHorizons();
+      if(view === 'week') renderWeek();
+      if(view === 'today') renderToday();
+      if(view === 'notes') renderNotes();
+
+      updateSubtitle();
+    }
+
+    function renderHorizons(){
+      const left = $('#leftBody');
+      const right = $('#rightBody');
+
+      const tabs = document.createElement('div');
+      tabs.className = 'tabs';
+      ['1','3','5','10','15','20'].forEach(h => {
+        const btn = document.createElement('button');
+        btn.className = 'tab';
+        btn.type = 'button';
+        btn.setAttribute('aria-selected', String(h === horizon));
+        btn.textContent = `${h} лет`;
+        btn.addEventListener('click', ()=>{ horizon = h; render(); });
+        tabs.appendChild(btn);
+      });
+      left.appendChild(tabs);
+
+      left.appendChild(elHint('Цели внутри выбранного горизонта. Долгие формулировки можно писать в описании.'));
+      left.appendChild(elSep());
+
+      const goals = state.horizons[horizon] || [];
+      if(goals.length === 0){
+        left.appendChild(elEmpty('Пока пусто. Нажми “+ Добавить” и создай первую цель.'));
+      } else {
+        const list = document.createElement('div');
+        list.className = 'list';
+        goals
+          .slice()
+          .sort((a,b)=> (a.done===b.done ? 0 : a.done ? 1 : -1))
+          .forEach(g => list.appendChild(goalItem(g)));
+        left.appendChild(list);
+      }
+
+      // Right side: quick filters and summary
+      const stats = document.createElement('div');
+      stats.className = 'split';
+      stats.appendChild(statCard(`${horizon} лет`, `${(state.horizons[horizon]||[]).length} целей`));
+      const doneCnt = (state.horizons[horizon]||[]).filter(x=>x.done).length;
+      stats.appendChild(statCard(`Выполнено`, `${doneCnt}`));
+      right.appendChild(stats);
+
+      right.appendChild(elSep());
+      right.appendChild(elHint('Подсказка: привязывай задачи недели к конкретной цели — так проще держать фокус.'));
+    }
+
+    function renderWeek(){
+      const left = $('#leftBody');
+      const right = $('#rightBody');
+
+      // Week add row
+      const addWrap = document.createElement('div');
+      addWrap.className = 'split';
+      addWrap.innerHTML = `
+        <div>
+          <div class="muted" style="margin:0 0 6px">Новая задача</div>
+          <input class="input" id="weekTitle" placeholder="Напр.: 3 собеса + 2 тренировки" />
+        </div>
+        <div>
+          <div class="muted" style="margin:0 0 6px">День</div>
+          <select id="weekDay">
+            ${DAYS.map(d=>`<option value="${d.k}">${d.n}</option>`).join('')}
+          </select>
+        </div>
+      `;
+      left.appendChild(addWrap);
+
+      const bindWrap = document.createElement('div');
+      bindWrap.style.marginTop = '10px';
+      bindWrap.innerHTML = `
+        <div class="muted" style="margin:0 0 6px">Привязать к цели (необязательно)</div>
+        <select id="weekBind"></select>
+      `;
+      left.appendChild(bindWrap);
+
+      const bindSel = $('#weekBind', bindWrap);
+      bindSel.appendChild(new Option('— Без привязки —', ''));
+      for(const h of ['1','3','5','10','15','20']){
+        const goals = state.horizons[h] || [];
+        if(goals.length === 0) continue;
+        const og = document.createElement('optgroup');
+        og.label = `${h} лет`;
+        goals.forEach(g => og.appendChild(new Option(g.title, g.id)));
+        bindSel.appendChild(og);
+      }
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'btn primary';
+      addBtn.type = 'button';
+      addBtn.style.marginTop = '10px';
+      addBtn.textContent = 'Добавить в неделю';
+      addBtn.addEventListener('click', ()=>{
+        const title = $('#weekTitle').value.trim();
+        const day = $('#weekDay').value;
+        const goalId = bindSel.value || null;
+        if(!title){ toast('Напиши название задачи'); return; }
+        state.week.unshift({ id: uid(), title, day, goalId, done:false, createdAt: Date.now() });
+        $('#weekTitle').value = '';
+        save();
+        render();
+        toast('Добавлено');
+      });
+      left.appendChild(addBtn);
+
+      left.appendChild(elSep());
+
+      const grouped = Object.fromEntries(DAYS.map(d=>[d.k, []]));
+      state.week.forEach(t => (grouped[t.day] ||= []).push(t));
+
+      DAYS.forEach(d => {
+        const sec = document.createElement('div');
+        sec.style.marginBottom = '10px';
+        sec.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 8px">
+          <div style="font-weight:800">${d.n}</div>
+          <div class="muted">${(grouped[d.k]||[]).length}</div>
+        </div>`;
+
+        const list = document.createElement('div');
+        list.className = 'list';
+        const arr = (grouped[d.k]||[]);
+        if(arr.length===0){
+          list.appendChild(elEmpty('Нет задач'));
+        } else {
+          arr
+            .slice()
+            .sort((a,b)=> (a.done===b.done ? 0 : a.done ? 1 : -1))
+            .forEach(t => list.appendChild(taskItem(t, 'week')));
+        }
+        sec.appendChild(list);
+        left.appendChild(sec);
+      });
+
+      // Right summary
+      const total = state.week.length;
+      const done = state.week.filter(x=>x.done).length;
+      right.appendChild(statCard('Всего', String(total)));
+      right.appendChild(statCard('Готово', String(done)));
+      right.appendChild(elSep());
+      right.appendChild(elHint('Совет: пусть на неделю будет 5–12 задач, иначе мозг начнет саботировать список.'));
+    }
+
+    function renderToday(){
+      const left = $('#leftBody');
+      const right = $('#rightBody');
+
+      // Add row
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <input class="input" id="todayTitle" placeholder="Добавить пункт (напр.: тренировка, сон до 00:30)" />
+        <button class="btn primary" id="todayAdd" type="button">Добавить</button>
+      `;
+      left.appendChild(row);
+      $('#todayAdd', row).addEventListener('click', ()=>{
+        const title = $('#todayTitle', row).value.trim();
+        if(!title){ toast('Напиши пункт'); return; }
+        state.today.unshift({ id: uid(), title, done:false, createdAt: Date.now() });
+        $('#todayTitle', row).value = '';
+        save(); render(); toast('Добавлено');
+      });
+
+      left.appendChild(elSep());
+
+      // Show today's week tasks based on weekday
+      const wd = (new Date()).getDay(); // 0 Sun..6 Sat
+      const map = ['sun','mon','tue','wed','thu','fri','sat'];
+      const key = map[wd];
+      const todaysWeek = state.week.filter(t => t.day===key && !t.done);
+
+      const focus = document.createElement('div');
+      focus.innerHTML = `<div class="muted" style="margin:0 0 8px">Задачи недели на сегодня</div>`;
+      const focusList = document.createElement('div');
+      focusList.className = 'list';
+      if(todaysWeek.length===0){
+        focusList.appendChild(elEmpty('Нет задач на сегодня (или все выполнено)'));
+      } else {
+        todaysWeek.forEach(t => focusList.appendChild(taskItem(t, 'week')));
+      }
+      focus.appendChild(focusList);
+      left.appendChild(focus);
+
+      left.appendChild(elSep());
+
+      const list = document.createElement('div');
+      list.className = 'list';
+      if(state.today.length===0){
+        list.appendChild(elEmpty('Чеклист дня пуст. Добавь 3–7 пунктов.'));
+      } else {
+        state.today
+          .slice()
+          .sort((a,b)=> (a.done===b.done ? 0 : a.done ? 1 : -1))
+          .forEach(x => list.appendChild(taskItem(x, 'today')));
+      }
+      left.appendChild(list);
+
+      // Right
+      const total = state.today.length;
+      const done = state.today.filter(x=>x.done).length;
+      right.appendChild(statCard('Чеклист', `${done}/${total}`));
+
+      right.appendChild(elSep());
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'btn danger';
+      resetBtn.type = 'button';
+      resetBtn.textContent = 'Сбросить чеклист (снять галочки)';
+      resetBtn.addEventListener('click', ()=>{
+        state.today.forEach(x=>x.done=false);
+        save(); render(); toast('Сброшено');
+      });
+      right.appendChild(resetBtn);
+
+      right.appendChild(elSep());
+      right.appendChild(elHint('Вечером: оставь 3 главных пункта на завтра — и мозгу легче засыпать.'));
+    }
+
+    function renderNotes(){
+      const left = $('#leftBody');
+      const right = $('#rightBody');
+
+      const ta = document.createElement('textarea');
+      ta.className = 'textarea';
+      ta.placeholder = 'Пиши сюда любые заметки: мысли, рефлексия, план разговора, идеи.';
+      ta.value = state.notes || '';
+      ta.addEventListener('input', ()=>{
+        state.notes = ta.value;
+        save();
+      });
+      left.appendChild(ta);
+
+      left.appendChild(elSep());
+      left.appendChild(elHint('Заметки сохраняются автоматически и остаются на устройстве.'));
+
+      // Tools
+      const tools = document.createElement('div');
+      tools.className = 'list';
+
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'btn danger';
+      clearBtn.type = 'button';
+      clearBtn.textContent = 'Очистить заметки';
+      clearBtn.addEventListener('click', ()=>{
+        state.notes = '';
+        save();
+        render();
+        toast('Очищено');
+      });
+
+      const backupHint = document.createElement('div');
+      backupHint.className = 'hint';
+      backupHint.innerHTML = `
+        <div style="font-weight:800;margin-bottom:6px">Резервная копия</div>
+        <div>Используй <span class="mono">Экспорт</span> (JSON-файл) раз в неделю. Это единственный способ перенести данные на другой iPhone.</div>
+      `;
+
+      tools.appendChild(backupHint);
+      tools.appendChild(clearBtn);
+      right.appendChild(tools);
+    }
+
+    // ---- Components ----
+    function elSep(){ const d=document.createElement('div'); d.className='sep'; return d; }
+
+    function elHint(text){
+      const p=document.createElement('div');
+      p.className='hint';
+      p.textContent=text;
+      return p;
+    }
+
+    function elEmpty(text){
+      const d=document.createElement('div');
+      d.className='item';
+      d.innerHTML = `<div style="flex:1" class="muted">${escapeHtml(text)}</div>`;
+      return d;
+    }
+
+    function statCard(a,b){
+      const d=document.createElement('div');
+      d.className='item';
+      d.innerHTML = `
+        <div style="flex:1;min-width:0">
+          <div class="muted">${escapeHtml(a)}</div>
+          <div style="font-weight:900;font-size:18px;margin-top:2px">${escapeHtml(b)}</div>
+        </div>
+      `;
+      return d;
+    }
+
+    function goalItem(g){
+      const d=document.createElement('div');
+      d.className='item';
+
+      const chk = document.createElement('div');
+      chk.className='chk';
+      chk.dataset.on = String(!!g.done);
+      chk.textContent = g.done ? '✓' : '';
+      chk.addEventListener('click', ()=>{
+        g.done = !g.done;
+        save();
+        render();
+      });
+
+      const main = document.createElement('main');
+      const meta = [];
+      meta.push(`<span class="badge">${horizon}Y</span>`);
+      if(g.createdAt) meta.push(`<span class="badge">${fmtDate(new Date(g.createdAt))}</span>`);
+      if(g.desc && g.desc.trim()) meta.push(`<span class="badge">описание</span>`);
+
+      main.innerHTML = `
+        <p class="it-title">${escapeHtml(g.title)}</p>
+        <p class="it-meta">${meta.join('')}</p>
+      `;
+
+      const actions = document.createElement('div');
+      actions.style.display='flex';
+      actions.style.gap='8px';
+
+      const edit = document.createElement('button');
+      edit.className='iconbtn';
+      edit.type='button';
+      edit.textContent='✎';
+      edit.title='Редактировать';
+      edit.addEventListener('click', ()=> openGoalDialog('edit', g));
+
+      const del = document.createElement('button');
+      del.className='iconbtn';
+      del.type='button';
+      del.textContent='🗑';
+      del.title='Удалить';
+      del.addEventListener('click', ()=>{
+        if(confirm('Удалить цель?')){
+          state.horizons[horizon] = (state.horizons[horizon]||[]).filter(x=>x.id!==g.id);
+          // Also unbind week tasks
+          state.week.forEach(t=>{ if(t.goalId===g.id) t.goalId=null; });
+          save(); render(); toast('Удалено');
+        }
+      });
+
+      actions.appendChild(edit);
+      actions.appendChild(del);
+
+      d.appendChild(chk);
+      d.appendChild(main);
+      d.appendChild(actions);
+      return d;
+    }
+
+    function taskItem(t, kind){
+      const d=document.createElement('div');
+      d.className='item';
+
+      const chk = document.createElement('div');
+      chk.className='chk';
+      chk.dataset.on = String(!!t.done);
+      chk.textContent = t.done ? '✓' : '';
+      chk.addEventListener('click', ()=>{
+        t.done = !t.done;
+        save();
+        render();
+      });
+
+      const main = document.createElement('main');
+
+      const meta = [];
+      if(kind==='week'){
+        const dn = (DAYS.find(x=>x.k===t.day)||{}).n || t.day;
+        meta.push(`<span class="badge">${dn}</span>`);
+      } else {
+        meta.push(`<span class="badge">today</span>`);
+      }
+
+      if(t.goalId){
+        const g = findGoal(t.goalId);
+        if(g) meta.push(`<span class="badge">цель: ${escapeHtml(g.title).slice(0,28)}${g.title.length>28?'…':''}</span>`);
+      }
+
+      main.innerHTML = `
+        <p class="it-title">${escapeHtml(t.title)}</p>
+        <p class="it-meta">${meta.join('')}</p>
+      `;
+
+      const del = document.createElement('button');
+      del.className='iconbtn';
+      del.type='button';
+      del.textContent='🗑';
+      del.title='Удалить';
+      del.addEventListener('click', ()=>{
+        if(kind==='week') state.week = state.week.filter(x=>x.id!==t.id);
+        if(kind==='today') state.today = state.today.filter(x=>x.id!==t.id);
+        save(); render(); toast('Удалено');
+      });
+
+      d.appendChild(chk);
+      d.appendChild(main);
+      d.appendChild(del);
+      return d;
+    }
+
+    function findGoal(id){
+      for(const h of ['1','3','5','10','15','20']){
+        const g = (state.horizons[h]||[]).find(x=>x.id===id);
+        if(g) return g;
+      }
+      return null;
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
+    }
+
+    // ---- Dialogs ----
+    const dlg = $('#dlg');
+
+    function openGoalDialog(mode, goal){
+      $('#dlgTitle').textContent = mode==='edit' ? 'Редактировать цель' : 'Новая цель';
+      $('#dlgSub').textContent = `${horizon} лет`; 
+
+      const title = goal?.title || '';
+      const desc = goal?.desc || '';
+
+      $('#dlgBody').innerHTML = `
+        <div class="list">
+          <div>
+            <div class="muted" style="margin:0 0 6px">Название</div>
+            <input class="input" id="gTitle" placeholder="Напр.: Переезд, бизнес, спорт, учеба" value="${escapeHtml(title)}" />
+          </div>
+          <div>
+            <div class="muted" style="margin:0 0 6px">Описание (необязательно)</div>
+            <textarea class="textarea" id="gDesc" placeholder="Критерий успеха, почему это важно, первые шаги.">${escapeHtml(desc)}</textarea>
+          </div>
+        </div>
+      `;
+
+      const foot = $('#dlgFoot');
+      foot.innerHTML = '';
+      const cancel = document.createElement('button');
+      cancel.className = 'btn';
+      cancel.value = 'cancel';
+      cancel.textContent = 'Отмена';
+
+      const ok = document.createElement('button');
+      ok.className = 'btn primary';
+      ok.value = 'default';
+      ok.textContent = mode==='edit' ? 'Сохранить' : 'Создать';
+      ok.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const t = $('#gTitle').value.trim();
+        const d = $('#gDesc').value.trim();
+        if(!t){ toast('Название обязательно'); return; }
+        if(mode==='edit'){
+          goal.title = t;
+          goal.desc = d;
+        } else {
+          state.horizons[horizon].unshift({ id: uid(), title: t, desc: d, done:false, createdAt: Date.now() });
+        }
+        save();
+        dlg.close();
+        render();
+        toast('Готово');
+      });
+
+      foot.appendChild(cancel);
+      foot.appendChild(ok);
+
+      dlg.showModal();
+      setTimeout(()=>$('#gTitle')?.focus(), 50);
+    }
+
+    function openQuickAdd(){
+      if(view==='horizons') return openGoalDialog('new');
+
+      // For week/today: quick add task
+      $('#dlgTitle').textContent = 'Быстро добавить';
+      $('#dlgSub').textContent = view==='week' ? 'Задача на неделю' : (view==='today' ? 'Пункт на сегодня' : '');
+
+      if(view==='week'){
+        $('#dlgBody').innerHTML = `
+          <div class="list">
+            <div>
+              <div class="muted" style="margin:0 0 6px">Название</div>
+              <input class="input" id="tTitle" placeholder="Напр.: 1 глава истории" />
+            </div>
+            <div class="split">
+              <div>
+                <div class="muted" style="margin:0 0 6px">День</div>
+                <select id="tDay">${DAYS.map(d=>`<option value="${d.k}">${d.n}</option>`).join('')}</select>
+              </div>
+              <div>
+                <div class="muted" style="margin:0 0 6px">Цель</div>
+                <select id="tGoal"></select>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const gs = $('#tGoal');
+        gs.appendChild(new Option('— Без привязки —',''));
+        for(const h of ['1','3','5','10','15','20']){
+          const goals = state.horizons[h] || [];
+          if(goals.length===0) continue;
+          const og = document.createElement('optgroup');
+          og.label = `${h} лет`;
+          goals.forEach(g => og.appendChild(new Option(g.title, g.id)));
+          gs.appendChild(og);
+        }
+
+        $('#dlgFoot').innerHTML = '';
+        const cancel = document.createElement('button');
+        cancel.className='btn';
+        cancel.value='cancel';
+        cancel.textContent='Отмена';
+
+        const ok = document.createElement('button');
+        ok.className='btn primary';
+        ok.value='default';
+        ok.textContent='Добавить';
+        ok.addEventListener('click', (e)=>{
+          e.preventDefault();
+          const title = $('#tTitle').value.trim();
+          const day = $('#tDay').value;
+          const goalId = $('#tGoal').value || null;
+          if(!title){ toast('Название обязательно'); return; }
+          state.week.unshift({ id: uid(), title, day, goalId, done:false, createdAt: Date.now() });
+          save(); dlg.close(); render(); toast('Добавлено');
+        });
+
+        $('#dlgFoot').appendChild(cancel);
+        $('#dlgFoot').appendChild(ok);
+
+        dlg.showModal();
+        setTimeout(()=>$('#tTitle')?.focus(), 50);
+        return;
+      }
+
+      if(view==='today'){
+        $('#dlgBody').innerHTML = `
+          <div class="list">
+            <div>
+              <div class="muted" style="margin:0 0 6px">Пункт</div>
+              <input class="input" id="tTitle" placeholder="Напр.: прогулка 30 мин" />
+            </div>
+          </div>
+        `;
+
+        $('#dlgFoot').innerHTML = '';
+        const cancel = document.createElement('button');
+        cancel.className='btn';
+        cancel.value='cancel';
+        cancel.textContent='Отмена';
+
+        const ok = document.createElement('button');
+        ok.className='btn primary';
+        ok.value='default';
+        ok.textContent='Добавить';
+        ok.addEventListener('click', (e)=>{
+          e.preventDefault();
+          const title = $('#tTitle').value.trim();
+          if(!title){ toast('Название обязательно'); return; }
+          state.today.unshift({ id: uid(), title, done:false, createdAt: Date.now() });
+          save(); dlg.close(); render(); toast('Добавлено');
+        });
+
+        $('#dlgFoot').appendChild(cancel);
+        $('#dlgFoot').appendChild(ok);
+
+        dlg.showModal();
+        setTimeout(()=>$('#tTitle')?.focus(), 50);
+      }
+    }
+
+    // ---- Export / Import ----
+    function doExport(){
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const d = new Date();
+      const stamp = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      a.download = `plans-backup-${stamp}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Экспортировано');
+    }
+
+    function doImport(file){
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const data = JSON.parse(String(reader.result || ''));
+          if(!data || typeof data !== 'object') throw new Error('bad');
+          state = Object.assign(structuredClone(DEFAULT), data);
+          save();
+          render();
+          toast('Импортировано');
+        }catch(e){
+          alert('Не удалось импортировать: файл не похож на резервную копию приложения.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ---- Wire up ----
+    $$('.navbtn').forEach(b => b.addEventListener('click', ()=> setView(b.dataset.view)));
+    $('#btnQuickAdd').addEventListener('click', openQuickAdd);
+    $('#btnExport').addEventListener('click', doExport);
+    $('#btnImport').addEventListener('click', ()=> $('#fileImport').click());
+    $('#fileImport').addEventListener('change', (e)=>{
+      const f = e.target.files?.[0];
+      if(f) doImport(f);
+      e.target.value='';
+    });
+
+    // Top pill date
+    const now = new Date();
+    $('#todayPill').textContent = new Intl.DateTimeFormat('ru-RU', { weekday:'short', day:'2-digit', month:'short' }).format(now);
+
+    render();
+  </script>
+</body>
+</html>
